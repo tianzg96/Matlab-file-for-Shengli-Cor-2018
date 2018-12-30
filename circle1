@@ -1,0 +1,114 @@
+clc
+clear all
+% 读入结构信息
+sp_raw=load('externalCompaction_y_stress_1000k.txt');
+sp=sp_raw(2:length(sp_raw),1:4);
+
+% 真实结构尺寸
+x_min=0;
+x_max=1;
+y_min=sp_raw(1,5);
+y_max=sp_raw(1,6);
+z_min=0;
+z_max=1;
+% 网格尺寸，单位网格长度为0.01
+dmsh=0.002;
+a=ceil((x_max-x_min)/dmsh);
+b=ceil((y_max-y_min)/dmsh);
+c=ceil((z_max-z_min)/dmsh);
+
+rr=zeros(a,b,c);
+pos=zeros(a,b,c);
+
+for i=1:length(sp)
+    x_w=sp(i,1)-sp(i,4);
+    while (x_w<=0)
+        x_w=x_w+dmsh;
+        if (x_w<=0)
+            continue
+        else
+            break
+        end
+    end
+    x_e=sp(i,1)+sp(i,4);
+    while (x_e>=1)
+        x_e=x_e-dmsh;
+        if (x_e>=1)
+            continue
+        else
+            break
+        end
+    end
+    
+    y_s=sp(i,2)-sp(i,4)-y_min;
+    while (y_s<=0)
+        y_s=y_s+dmsh;
+        if (y_s<=0)
+            continue
+        else
+            break
+        end
+    end
+    y_n=sp(i,2)+sp(i,4)-y_min;
+    while (y_n>=1)
+        y_n=y_n-dmsh;
+        if (y_n>=1)
+            continue
+        else
+            break
+        end
+    end
+    
+    z_b=sp(i,3)-sp(i,4);
+    while (z_b<=0)
+        z_b=z_b+dmsh;
+        if (z_b<=0)
+            continue
+        else
+            break
+        end
+    end
+    z_f=sp(i,3)+sp(i,4);
+    while (z_f>=1)
+        z_f=z_f-dmsh;
+        if (z_f>=1)
+            continue
+        else
+            break
+        end
+    end    
+    
+    node_w=ceil(x_w/dmsh);
+    node_e=floor(x_e/dmsh);
+    node_s=ceil(y_s/dmsh);
+    node_n=floor(y_n/dmsh);
+    node_b=ceil(z_b/dmsh);
+    node_f=floor(z_f/dmsh);
+    
+    for ii=node_w:node_e
+        for jj=node_s:node_n
+            for kk=node_b:node_f
+                pos_x=dmsh*ii;
+                pos_y=dmsh*jj;
+                pos_z=dmsh*kk;
+                length_from_sp_center=((pos_x-sp(i,1))^2+(pos_y-sp(i,2)+y_min)^2+(pos_z-sp(i,3))^2)^0.5;
+                if (length_from_sp_center <= sp(i,4))
+                    rr(ii,jj,kk)=1;
+                end
+            end
+        end
+    end
+end
+
+y_plane1=rr(:,100,:);
+for i=1:a
+    for j=1:c
+        y_2d1(i,j)=1-y_plane1(i,1,j);
+    end
+end
+
+imagesc(y_2d1)
+colormap(gray(256))
+axis equal
+
+save('circle1.mat','y_2d1')
