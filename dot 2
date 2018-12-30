@@ -1,0 +1,110 @@
+clc;
+clear all;
+
+% 读入结构信息
+load('circle1.mat');
+rr=y_2d1;
+a=length(rr);
+b=a;
+% 画网格
+s0=0.06;                 % volumetric water content    ;  2
+l_l=0.02;          % liquid growing rate on liquid
+l_s=0.02;           % liquid growing rate on solid
+
+ssolid=sum(sum(rr));  % total volume of solid
+s_solid=ssolid/a/b;
+
+for time=1:100
+
+for i=1:a
+    for j=1:b
+        if(rr(i,j)>0)
+                
+            i_e=mod(i,a)+1;
+            j_n=mod(j,b)+1;
+            i_w=a-mod(a+1-i,a);
+            j_s=b-mod(b+1-j,b);
+                
+            num_0=0;
+            if(rr(i_w,j)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i_e,j)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i,j_s)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i,j_n)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i_w,j_s)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i_e,j_s)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i_w,j_n)==0)
+                num_0=num_0+1;
+            end
+            if(rr(i_e,j_n)==0)
+                num_0=num_0+1;
+            end
+            if(num_0==1)
+                Ll1=l_s;
+
+                if(rr(i_e,j)==0&rand<Ll1)
+                    rr(i_e,j)=rr(i_e,j)+0.5;
+                end
+                if(rr(i_w,j)==0&rand<Ll1)
+                    rr(i_w,j)=rr(i_w,j)+0.5;
+                end
+                if(rr(i,j_n)==0&rand<Ll1)
+                	rr(i,j_n)=rr(i,j_n)+0.5;
+                end
+                if(rr(i,j_s)==0&rand<Ll1)
+                    rr(i,j_s)=rr(i,j_s)+0.5;
+                end
+            end
+        end
+    end
+end
+
+end
+
+Ll1=Ll1*0.1;
+for time=1:1500
+
+    for i=1:a
+        for j=1:b
+            if(rr(i,j)==0.5)
+                
+                i_e=mod(i,a)+1;
+                j_n=mod(j,b)+1;
+                i_w=a-mod(a+1-i,a);
+                j_s=b-mod(b+1-j,b);
+                if(rr(i_e,j)==0&rand<Ll1)
+                    rr(i_e,j)=rr(i_e,j)+0.5;
+                end
+                if(rr(i_w,j)==0&rand<Ll1)
+                    rr(i_w,j)=rr(i_w,j)+0.5;
+                end
+                if(rr(i,j_n)==0&rand<Ll1)
+                	rr(i,j_n)=rr(i,j_n)+0.5;
+                end
+                if(rr(i,j_s)==0&rand<Ll1)
+                    rr(i,j_s)=rr(i,j_s)+0.5;
+                end
+
+            end
+        end
+    end
+
+end
+
+rr=1-rr;
+imagesc(rr)
+colormap(gray(256))
+axis equal
+    
+   
